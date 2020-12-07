@@ -1,0 +1,120 @@
+
+{% load leaflet_tags %}
+<html>
+  <head>
+    {% load static %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+    <title>Regions</title>
+    <style>
+      .leaflet-container { height: 100%; width: 100%;}
+    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'leaflet.groupedlayercontrol/leaflet.groupedlayercontrol.min.css' %}">
+    <script type="text/javascript" src="{% static 'dist/leaflet.ajax.js' %}"></script>
+    <script type="text/javascript" src="{% static 'leaflet.groupedlayercontrol/leaflet.groupedlayercontrol.min.js'%}"></script>
+  </head>
+  <body>
+    <h1>NGO Regions</h1>
+    <br/>
+    <script type="text/javascript">
+      function make_layers(map, options){
+        // var osm = "https://{s}.tile.openstreetmap.org/{z}{y}{x}.png"
+        var osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}{y}{x}.png');
+        var datasets = new L.GeoJSON.AJAX("{% url 'county' %}", {
+          style: function colors(feature){
+            switch(feature.properties.county) {
+              case "Nairobi":
+                return {color:"Red", fillOpacity:0.45, weight:4}
+                break;
+              case "Mombasa":
+                return {color:"yellow", fillOpacity:0.45, weight:4}
+                break;
+              case "Kwale":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Taita Taveta":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Kilifi":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Kisumu":
+                return {color:"yellow", fillOpacity:0.45, weight:4}
+                break;
+              case "Homa Bay":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Siaya":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Kisii":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Isiolo":
+                return {color:"yellow", fillOpacity:0.45, weight:4}
+                break;
+              case "Samburu":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Wajir":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+              case "Garissa":
+                return {color:"#2bd4c5", fillOpacity:0.45, weight:4}
+                break;
+            }
+          },
+          onEachFeature: function(feature, layer){
+            layer.bindPopup(feature.properties.county.toString())
+          }
+
+        });
+        var hqpoints = new L.GeoJSON.AJAX("{% url 'headquarter' %}", {
+          
+          onEachFeature: function(feature, layer){
+            layer.bindPopup(feature.properties.description.toString())
+          }
+        })
+
+        var regionpoints = new L.GeoJSON.AJAX("{% url 'regionaloffice' %}", {
+          
+          onEachFeature: function(feature, layer){
+            layer.bindPopup(feature.properties.description.toString())
+          }
+        })
+
+        var fieldpoints = new L.GeoJSON.AJAX("{% url 'fieldoffice' %}", {
+          
+          onEachFeature: function(feature, layer){
+            layer.bindPopup("<b>" +feature.properties.name.toString()+ "</b> <br/>"+ "<b>Location: </b>" + feature.properties.city.toString() + "<br/> <b> Issue Handled: </b>" + feature.properties.issue.toString() + "<br/> <b> No. Of Staff: </b> " + feature.properties.number_of_staff.toString() + "<br>"
+            )
+          }
+        })
+        
+        
+        datasets.addTo(map);
+        hqpoints.addTo(map)
+        regionpoints.addTo(map);
+        fieldpoints.addTo(map)
+
+        var baseLayers = {
+          "OSM":osm
+        } 
+        var groupedOverlays = {
+            "Layers": {
+          "county": datasets,
+          "Headquarters": hqpoints,
+          "Regions": regionpoints,
+          "FieldOffices": fieldpoints,
+
+        },
+       
+      };
+
+      L.control.groupedLayers(baseLayers, groupedOverlays).addTo(map);                        
+      }
+
+    </script>
+    {% leaflet_map "yourmap" callback="window.make_layers" %}
+  </body>
+</html>
